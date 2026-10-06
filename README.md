@@ -1,16 +1,42 @@
-# React + Vite
+# Sentinel-X — dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Supervision dashboard of the Sentinel-X node (React + Vite), served by an unprivileged nginx that also proxies `/api` and `/ws` to the backend: the browser only talks to one origin.
 
-Currently, two official plugins are available:
+## Panels
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Panel | Content |
+|---|---|
+| Header | node, online / silent / offline, backend services (MQTT, CouchDB), open alerts, alert sound, role |
+| Environmental telemetry | DHT22, humidity, MQ-2 (mV, warm-up), PIR; history 15 min / 1 h (raw + live) and 6 h / 24 h (per-minute averages from CouchDB); local ceilings of the environment LED; last Isolation Forest verdict |
+| Vision | MJPEG stream of IA_Vision (if configured) and its last detection |
+| Alerts | `warning` (an anomaly pattern begins) and `confirmed` (it keeps evolving, the node's LED blinks); acknowledgement |
+| Node commands | blink / stop the environment LED; test periods (annotations) excluded from AI training |
+| Event log | latest stored events of the node, then live: motion, connections, commands, alerts |
 
-## React Compiler
+Sensor failures and data gaps stay visible (`ERR`, broken chart lines) instead of being hidden.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Access
 
-## Expanding the Oxlint configuration
+The login asks for an **access key**: the backend's `API_OPERATOR_TOKEN` (full access) or `API_SERVICE_TOKEN` (read-only). It is kept in `sessionStorage` only: closing the tab logs out.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Development
+
+```bash
+pnpm install
+cp .env.example .env.local   # BACKEND_URL of a running backend
+pnpm dev                     # http://localhost:3000, /api and /ws proxied to BACKEND_URL
+pnpm lint && pnpm build
+```
+
+## Production
+
+Built and run by the `infra` stack (`dashboard` service, port `10443` on the host → nginx `8080`).
+
+```bash
+docker build -t sentinel/dashboard .
+docker build --build-arg VITE_VISION_STREAM_URL=/vision/stream.mjpg -t sentinel/dashboard .
+```
+
+`VITE_VISION_STREAM_URL` must be on the same origin: the Content-Security-Policy only allows the dashboard's own host (no external fonts or scripts either, the table network is isolated).
+
+nginx adds `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, a strict CSP, and limits request bodies to 32 KB.
