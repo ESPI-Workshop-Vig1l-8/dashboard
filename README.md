@@ -38,6 +38,6 @@ docker build --build-arg VITE_VISION_STREAM_URL=/vision/stream.mjpg -t sentinel/
 ```
 
 - `VITE_VISION_STREAM_URL` (default `/vision/stream.mjpg`) must be on the same origin: the Content-Security-Policy only allows the dashboard's own host (no external fonts or scripts either, the table network is isolated). The access key is appended as `?token=`; IA_Vision checks it against the backend.
-- nginx proxies `/vision/` to `VISION_UPSTREAM` (default `http://host.docker.internal:8000`: IA_Vision runs on the host, next to the webcam). The host name must resolve when the container starts (`extra_hosts: host.docker.internal:host-gateway` in the infra compose).
+- nginx proxies `/vision/` to `VISION_UPSTREAM`, resolved at request time through Docker's DNS: default `http://ia-vision:8000` (IA_Vision container of the infra stack, Linux). When IA_Vision runs on the host instead (Windows/macOS), use an IP address reachable from the container, e.g. `http://192.168.10.1:8000` (host names from `extra_hosts` are not resolved at request time).
 
 nginx adds `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, a strict CSP, and limits request bodies to 32 KB.

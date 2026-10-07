@@ -10,6 +10,7 @@ server {
     # Docker DNS, resolved at request time: nginx starts even if the backend is down
     resolver 127.0.0.11 valid=10s ipv6=off;
     set $backend http://backend:5000;
+    set $vision ${VISION_UPSTREAM};
 
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-Frame-Options "DENY" always;
@@ -32,20 +33,25 @@ server {
         proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_read_timeout 120s;
+        # the URL carries the access key (?token=): not in the logs
+        access_log off;
+        error_log /dev/stderr crit;
     }
 
-    # MJPEG stream of IA_Vision (runs on the host, next to the webcam).
+    # MJPEG stream of IA_Vision (ia-vision container, or the host: see README).
     # IA_Vision checks the ?token= itself against the backend.
-    # Fixed proxy_pass: resolved once at start, through /etc/hosts too
-    # (host.docker.internal comes from extra_hosts on Linux).
+    # Resolved at request time like the backend: nginx starts without IA_Vision
+    # and follows the container if it restarts with another IP.
     location /vision/ {
-        proxy_pass ${VISION_UPSTREAM};
+        proxy_pass $vision;
         proxy_http_version 1.1;
         proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_buffering off;
         proxy_read_timeout 1h;
-        access_log off; # the stream URL carries the access key
+        # the stream URL carries the access key (?token=): not in the logs
+        access_log off;
+        error_log /dev/stderr crit;
     }
 
     location / {
