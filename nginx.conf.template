@@ -33,6 +33,9 @@ server {
         proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_read_timeout 120s;
+        # the URL carries the access key (?token=): not in the logs
+        access_log off;
+        error_log /dev/stderr crit;
     }
 
     # MJPEG stream of IA_Vision (ia-vision container, or the host: see README).
@@ -46,7 +49,9 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_buffering off;
         proxy_read_timeout 1h;
-        access_log off; # the stream URL carries the access key
+        # the stream URL carries the access key (?token=): not in the logs
+        access_log off;
+        error_log /dev/stderr crit;
     }
 
     location / {
