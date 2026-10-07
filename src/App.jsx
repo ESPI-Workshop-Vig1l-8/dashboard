@@ -86,8 +86,10 @@ function Dashboard({ token, role, onLogout }) {
       <Header devices={devices} selectedId={selectedId} onSelect={setSelected} conn={state.conn} health={health}
         openAlerts={openAlerts} now={now} role={role} sound={sound} onSound={() => setSound((s) => !s)} onLogout={() => onLogout()} />
 
-      <div className="grid-panels">
+      <div style={{ marginBottom: '20px' }}>
         <SensorPanel device={device} live={state.live[selectedId]} now={now} lastPrediction={lastPrediction} />
+      </div>
+      <div className="grid-panels">
         <CameraPanel motion={device?.motion} lastVisionAlert={lastVision} now={now} />
         <AlertsPanel alerts={state.alerts} canAct={canAct} onUpdated={actions.alertUpdated} />
         <ControlPanel key={selectedId || 'none'} device={device} canAct={canAct} now={now}

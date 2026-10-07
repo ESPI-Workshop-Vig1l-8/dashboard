@@ -1,8 +1,6 @@
-import { useId } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import { fmtTime } from '../lib/format';
 
-const W = 600;
-const H = 120;
 const PAD = { left: 44, right: 8, top: 8, bottom: 20 };
 const MAX_POINTS = 600;
 
@@ -26,8 +24,21 @@ function downsample(points, key) {
 
 // Line chart of one metric. Missing values (null) break the line, so a
 // sensor failure or a gap in the data stays visible.
-export default function Chart({ points, metric, from, to, color, unit, digits = 1, threshold, maxGapMs = 10000 }) {
+export default function Chart({ points, metric, from, to, color, unit, digits = 1, threshold, maxGapMs = 10000, height = 120 }) {
   const gradId = useId();
+  // The drawing uses the real width of the container: a wider chart gets more
+  // detail instead of being stretched (text keeps its size).
+  const box = useRef(null);
+  const [W, setW] = useState(600);
+  const H = height;
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return undefined;
+    setW(Math.max(200, Math.round(el.getBoundingClientRect().width))); // before the first paint
+    const ro = new ResizeObserver(([entry]) => setW(Math.max(200, Math.round(entry.contentRect.width))));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const data = downsample(points, metric);
   const values = data.map((p) => p[metric]).filter((v) => typeof v === 'number');
 
@@ -63,7 +74,8 @@ export default function Chart({ points, metric, from, to, color, unit, digits = 
   const ticks = [min + margin, (min + max) / 2, max - margin];
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: '120px', overflow: 'visible' }} role="img" aria-label={`Historique ${metric}`}>
+    <div ref={box} style={{ width: '100%' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: `${H}px`, overflow: 'visible', display: 'block' }} role="img" aria-label={`Historique ${metric}`}>
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.16" />
@@ -116,5 +128,6 @@ export default function Chart({ points, metric, from, to, color, unit, digits = 
         </text>
       )}
     </svg>
+    </div>
   );
 }
