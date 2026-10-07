@@ -13,7 +13,7 @@ RUN pnpm lint && pnpm build
 FROM nginxinc/nginx-unprivileged:1.27-alpine
 # envsubst at start: only defined environment variables are replaced
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
-ENV VISION_UPSTREAM=http://host.docker.internal:8000
+ENV VISION_UPSTREAM=http://ia-vision:8000
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s CMD wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1
