@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Camera, AlertTriangle } from 'lucide-react';
+import { getToken } from '../lib/api';
 import { fmtAgo } from '../lib/format';
 
-// MJPEG stream published by IA_Vision on the server (USB webcam), e.g.
-// VITE_VISION_STREAM_URL=/vision/stream.mjpg behind the same nginx.
+// MJPEG stream published by IA_Vision on the server (USB webcam), proxied by
+// nginx under /vision/. IA_Vision checks the access key passed in ?token=.
 const STREAM_URL = import.meta.env.VITE_VISION_STREAM_URL || '';
 const RECENT_MS = 30_000;
 
 export default function CameraPanel({ motion, lastVisionAlert, now }) {
   const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const src = STREAM_URL ? `${STREAM_URL}?token=${encodeURIComponent(getToken())}&r=${attempt}` : '';
   const recent = lastVisionAlert && now - lastVisionAlert.received_at < RECENT_MS && !lastVisionAlert.acked_at;
 
   return (
@@ -28,7 +31,7 @@ export default function CameraPanel({ motion, lastVisionAlert, now }) {
         overflow: 'hidden', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         {STREAM_URL && !failed ? (
-          <img src={STREAM_URL} alt="Flux vidéo de la webcam analysé par IA_Vision" onError={() => setFailed(true)}
+          <img src={src} alt="Flux vidéo de la webcam analysé par IA_Vision" onError={() => setFailed(true)}
             style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '24px', textAlign: 'center', maxWidth: '440px' }}>
@@ -37,7 +40,7 @@ export default function CameraPanel({ motion, lastVisionAlert, now }) {
             </div>
             {STREAM_URL ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--amber)', fontSize: '13px' }}>
-                <AlertTriangle size={15} /> Flux vidéo injoignable ({STREAM_URL})
+                <AlertTriangle size={15} /> Flux vidéo injoignable : IA_Vision est-il lancé sur le serveur ?
               </span>
             ) : (
               <span className="mono-note">
@@ -46,7 +49,7 @@ export default function CameraPanel({ motion, lastVisionAlert, now }) {
               </span>
             )}
             {STREAM_URL && (
-              <button type="button" className="interactive-btn" onClick={() => setFailed(false)}>Réessayer</button>
+              <button type="button" className="interactive-btn" onClick={() => { setFailed(false); setAttempt((n) => n + 1); }}>Réessayer</button>
             )}
           </div>
         )}
