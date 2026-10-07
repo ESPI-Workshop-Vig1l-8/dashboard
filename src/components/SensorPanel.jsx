@@ -3,6 +3,7 @@ import { Activity, Droplets, Flame, Thermometer, Wifi } from 'lucide-react';
 import { api } from '../lib/api';
 import { fmtAgo, fmtNum, GAS_WARN_MV, STALE_MS, TEMP_WARN_C } from '../lib/format';
 import Chart from './Chart';
+import ExportCsv from './ExportCsv';
 
 const RANGES = [
   { key: '15m', label: '15 min', ms: 15 * 60_000, step: 'raw' },
@@ -115,28 +116,33 @@ export default function SensorPanel({ device, live, now, lastPrediction }) {
       <div className="sub-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div className="panel-head">
           <span className="mono-note">HISTORIQUE {range.step === 'raw' ? '(MESURES BRUTES + TEMPS RÉEL)' : '(MOYENNES PAR MINUTE)'}</span>
-          <div className="segmented">
-            {RANGES.map((r) => (
-              <button key={r.key} type="button" className={r.key === range.key ? 'active' : ''} onClick={() => setRange(r)}>
-                {r.label}
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className="segmented">
+              {RANGES.map((r) => (
+                <button key={r.key} type="button" className={r.key === range.key ? 'active' : ''} onClick={() => setRange(r)}>
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            <ExportCsv deviceId={id} />
           </div>
         </div>
         {history.error && <span className="mono-note" style={{ color: 'var(--amber)' }}>Historique indisponible : {history.error}</span>}
+        <div className="chart-grid">
         {METRICS.map((m) => {
           const last = [...points].reverse().find((p) => typeof p[m.key] === 'number');
           return (
-            <div key={m.key}>
+            <div key={m.key} style={{ minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontFamily: 'var(--font-mono)' }}>
                 <span style={{ color: m.color, fontWeight: 600 }}>• {m.label} ({m.unit})</span>
                 <span style={{ color: 'var(--text-muted)' }}>{last ? `${fmtNum(last[m.key], m.digits ?? 1)} ${m.unit}` : '—'}</span>
               </div>
               <Chart points={points} metric={m.key} from={from} to={now} color={m.color} unit={m.unit}
-                digits={m.digits ?? 1} threshold={m.threshold} maxGapMs={range.step === 'raw' ? 10_000 : 180_000} />
+                digits={m.digits ?? 1} threshold={m.threshold} maxGapMs={range.step === 'raw' ? 10_000 : 180_000} height={180} />
             </div>
           );
         })}
+        </div>
       </div>
 
       <div className="sub-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>

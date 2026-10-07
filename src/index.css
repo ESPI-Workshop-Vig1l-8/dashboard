@@ -333,13 +333,22 @@ body {
 
 .grid-panels {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
+  align-items: start;
+}
+
+/* the 3 history charts side by side on wide screens, stacked otherwise */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 16px 24px;
 }
 
 @media (max-width: 640px) {
-  .grid-panels {
+  .grid-panels,
+  .chart-grid {
     grid-template-columns: 1fr;
   }
 }
