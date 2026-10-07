@@ -3,6 +3,7 @@ import { Activity, Droplets, Flame, Thermometer, Wifi } from 'lucide-react';
 import { api } from '../lib/api';
 import { fmtAgo, fmtNum, GAS_WARN_MV, STALE_MS, TEMP_WARN_C } from '../lib/format';
 import Chart from './Chart';
+import ExportCsv from './ExportCsv';
 
 const RANGES = [
   { key: '15m', label: '15 min', ms: 15 * 60_000, step: 'raw' },
@@ -115,12 +116,15 @@ export default function SensorPanel({ device, live, now, lastPrediction }) {
       <div className="sub-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div className="panel-head">
           <span className="mono-note">HISTORIQUE {range.step === 'raw' ? '(MESURES BRUTES + TEMPS RÉEL)' : '(MOYENNES PAR MINUTE)'}</span>
-          <div className="segmented">
-            {RANGES.map((r) => (
-              <button key={r.key} type="button" className={r.key === range.key ? 'active' : ''} onClick={() => setRange(r)}>
-                {r.label}
-              </button>
-            ))}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className="segmented">
+              {RANGES.map((r) => (
+                <button key={r.key} type="button" className={r.key === range.key ? 'active' : ''} onClick={() => setRange(r)}>
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            <ExportCsv deviceId={id} />
           </div>
         </div>
         {history.error && <span className="mono-note" style={{ color: 'var(--amber)' }}>Historique indisponible : {history.error}</span>}

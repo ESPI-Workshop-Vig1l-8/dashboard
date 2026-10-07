@@ -7,8 +7,8 @@ Supervision dashboard of the Sentinel-X node (React + Vite), served by an unpriv
 | Panel | Content |
 |---|---|
 | Header | node, online / silent / offline, backend services (MQTT, CouchDB), open alerts, alert sound, role |
-| Environmental telemetry | DHT22, humidity, MQ-2 (mV, warm-up), PIR; history 15 min / 1 h (raw + live) and 6 h / 24 h (per-minute averages from CouchDB); local ceilings of the environment LED; last Isolation Forest verdict |
-| Vision | MJPEG stream of IA_Vision (proxied under `/vision/`, protected by the access key) and its last detection |
+| Environmental telemetry | DHT22, humidity, MQ-2 (mV, warm-up), PIR; history 15 min / 1 h (raw + live) and 6 h / 24 h (per-minute averages from CouchDB); local ceilings of the environment LED; last Isolation Forest verdict; **"Exporter CSV"**: training CSV for the Isolation Forest (1 h to 7 days, normal readings only, optionally with the test periods for evaluation) |
+| Vision | compact status (zone, PIR, last detection); live MJPEG stream of IA_Vision on demand ("Afficher le flux", proxied under `/vision/`, protected by the access key) |
 | Alerts | `warning` (an anomaly pattern begins) and `confirmed` (it keeps evolving, the node's LED blinks); acknowledgement |
 | Node commands | blink / stop the environment LED; test periods (annotations) excluded from AI training |
 | Event log | latest stored events of the node, then live: motion, connections, commands, alerts |

@@ -92,3 +92,28 @@ export function connectSocket(token, { onMessage, onStatus }) {
     ws?.close();
   };
 }
+
+// Downloads a file from the API (the token goes in the header, so a plain link
+// can't be used). Returns the response headers.
+export async function download(path, fallbackName) {
+  let res;
+  try {
+    res = await fetch(`/api/v1${path}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  } catch {
+    throw new ApiError(0, 'Backend injoignable');
+  }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, data.error || res.statusText);
+  }
+  const name = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') || '')?.[1] || fallbackName;
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return res.headers;
+}
