@@ -13,21 +13,28 @@ const RANGES = [
 ];
 
 const METRICS = [
-  { key: 'temp_c', label: 'Température', unit: '°C', color: 'var(--amber)', threshold: TEMP_WARN_C },
-  { key: 'hum_pct', label: 'Humidité', unit: '%', color: 'var(--sky)' },
-  { key: 'gas_mv', label: 'Gaz MQ-2', unit: 'mV', color: 'var(--emerald)', digits: 0, threshold: GAS_WARN_MV },
+  { key: 'temp_c', label: 'Température', unit: '°C', color: 'var(--warn)', threshold: TEMP_WARN_C },
+  { key: 'hum_pct', label: 'Humidité', unit: '%', color: 'var(--info)' },
+  { key: 'gas_mv', label: 'Gaz MQ-2', unit: 'mV', color: 'var(--gas)', digits: 0, threshold: GAS_WARN_MV },
 ];
 
-function MetricCard({ icon, label, value, unit, foot, tone }) {
+// ratio: value / local ceiling, drawn as a gauge on the card's bottom edge
+function MetricCard({ icon, label, value, unit, foot, tone, ratio, color }) {
+  const fill = typeof ratio === 'number' && Number.isFinite(ratio) ? Math.min(1, Math.max(0, ratio)) : null;
   return (
-    <div className={`sub-card ${tone === 'alert' ? 'is-alert' : tone === 'warning' ? 'is-warning' : ''}`}>
+    <div className={`sub-card reading ${tone === 'alert' ? 'is-alert' : tone === 'warning' ? 'is-warning' : ''}`}>
       <div className="metric-label">{icon}<span>{label}</span></div>
-      <div className="metric-value tabular" style={{ color: tone === 'alert' ? 'var(--rose)' : undefined }}>
+      <div className="metric-value tabular" style={{ color: tone === 'alert' ? 'var(--danger)' : undefined }}>
         {value} <span className="metric-unit">{unit}</span>
       </div>
-      <div className="metric-foot" style={{ color: tone === 'alert' ? 'var(--rose)' : tone === 'warning' ? 'var(--amber)' : undefined }}>
+      <div className="metric-foot" style={{ color: tone === 'alert' ? 'var(--danger)' : tone === 'warning' ? 'var(--warn)' : undefined }}>
         {foot}
       </div>
+      {fill != null && (
+        <div className="gauge" aria-hidden="true">
+          <span style={{ width: `${fill * 100}%`, background: tone === 'alert' ? 'var(--danger)' : color }} />
+        </div>
+      )}
     </div>
   );
 }
@@ -85,29 +92,29 @@ export default function SensorPanel({ device, live, now, lastPrediction }) {
           Télémétrie environnementale
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-          {status.env_warn && <span className="badge" style={{ color: 'var(--rose)', borderColor: 'var(--rose-border)' }}>Plafond local dépassé (LED fixe)</span>}
-          {status.gas_warm === false && <span className="badge" style={{ color: 'var(--amber)', borderColor: 'var(--amber-border)' }}>MQ-2 en préchauffage</span>}
-          <span className="badge" style={{ color: stale ? 'var(--amber)' : 'var(--text-secondary)' }}>
+          {status.env_warn && <span className="badge" style={{ color: 'var(--danger)', borderColor: 'var(--danger-border)' }}>Plafond local dépassé (LED fixe)</span>}
+          {status.gas_warm === false && <span className="badge" style={{ color: 'var(--warn)', borderColor: 'var(--warn-border)' }}>MQ-2 en préchauffage</span>}
+          <span className="badge" style={{ color: stale ? 'var(--warn)' : 'var(--text-secondary)' }}>
             <Wifi size={11} /> {stale ? 'pas de données ' : ''}{fmtAgo(device.last_seen, now)}
             {typeof status.rssi === 'number' ? ` · ${status.rssi} dBm` : ''}
           </span>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-        <MetricCard icon={<Thermometer size={15} color="var(--amber)" />} label="DHT22 température"
+      <div className="readings">
+        <MetricCard icon={<Thermometer size={15} color="var(--warn)" />} label="Température"
           value={dhtError ? 'ERR' : fmtNum(t.temp_c)} unit="°C"
-          foot={dhtError ? 'Capteur sans réponse' : tempHigh ? `Au-dessus de ${TEMP_WARN_C} °C` : 'Lecture toutes les 2 s'}
-          tone={dhtError ? 'warning' : tempHigh ? 'alert' : null} />
-        <MetricCard icon={<Droplets size={15} color="var(--sky)" />} label="Humidité"
+          foot={dhtError ? 'DHT22 sans réponse' : tempHigh ? `Au-dessus de ${TEMP_WARN_C} °C` : 'DHT22 · toutes les 2 s'}
+          tone={dhtError ? 'warning' : tempHigh ? 'alert' : null} ratio={dhtError ? null : t.temp_c / TEMP_WARN_C} color="var(--warn)" />
+        <MetricCard icon={<Droplets size={15} color="var(--info)" />} label="Humidité"
           value={dhtError ? 'ERR' : fmtNum(t.hum_pct)} unit="%"
           foot={dhtError ? 'Capteur sans réponse' : 'Humidité relative'}
-          tone={dhtError ? 'warning' : null} />
-        <MetricCard icon={<Flame size={15} color={gasHigh ? 'var(--rose)' : 'var(--emerald)'} />} label="Gaz MQ-2"
+          tone={dhtError ? 'warning' : null} ratio={dhtError ? null : t.hum_pct / 100} color="var(--info)" />
+        <MetricCard icon={<Flame size={15} color={gasHigh ? 'var(--danger)' : 'var(--gas)'} />} label="Gaz MQ-2"
           value={fmtNum(t.gas_mv, 0)} unit="mV"
           foot={status.gas_warm === false ? 'Préchauffage (3 min)' : gasHigh ? `Au-dessus de ${GAS_WARN_MV} mV` : 'Sortie AO, non étalonnée'}
-          tone={gasHigh ? 'alert' : status.gas_warm === false ? 'warning' : null} />
-        <MetricCard icon={<Activity size={15} color={device.motion ? 'var(--rose)' : 'var(--text-muted)'} />} label="PIR HC-SR501"
+          tone={gasHigh ? 'alert' : status.gas_warm === false ? 'warning' : null} ratio={t.gas_mv / GAS_WARN_MV} color="var(--gas)" />
+        <MetricCard icon={<Activity size={15} color={device.motion ? 'var(--danger)' : 'var(--text-muted)'} />} label="PIR HC-SR501"
           value={device.motion ? 'MOUVEMENT' : 'Calme'} unit=""
           foot={`${t.pir_events ?? 0} détection(s) sur la dernière mesure`}
           tone={device.motion ? 'alert' : null} />
@@ -127,7 +134,7 @@ export default function SensorPanel({ device, live, now, lastPrediction }) {
             <ExportCsv deviceId={id} />
           </div>
         </div>
-        {history.error && <span className="mono-note" style={{ color: 'var(--amber)' }}>Historique indisponible : {history.error}</span>}
+        {history.error && <span className="mono-note" style={{ color: 'var(--warn)' }}>Historique indisponible : {history.error}</span>}
         <div className="chart-grid">
         {METRICS.map((m) => {
           const last = [...points].reverse().find((p) => typeof p[m.key] === 'number');
@@ -153,14 +160,14 @@ export default function SensorPanel({ device, live, now, lastPrediction }) {
         <div style={{ textAlign: 'right' }}>
           {prediction ? (
             <>
-              <div className="tabular" style={{ fontWeight: 700, color: prediction.level === 'confirmed' ? 'var(--rose)' : 'var(--amber)' }}>
+              <div className="tabular" style={{ fontWeight: 700, color: prediction.level === 'confirmed' ? 'var(--danger)' : 'var(--warn)' }}>
                 {prediction.level === 'confirmed' ? 'Anomalie confirmée' : 'Début d\'anomalie'}
               </div>
               <div className="mono-note">{fmtAgo(prediction.received_at, now)}{prediction.acked_at ? ' · acquittée' : ''}</div>
             </>
           ) : (
             <>
-              <div className="tabular" style={{ fontWeight: 700, color: 'var(--emerald)' }}>Aucune anomalie</div>
+              <div className="tabular" style={{ fontWeight: 700, color: 'var(--ok)' }}>Aucune anomalie</div>
               <div className="mono-note">aucune alerte reçue</div>
             </>
           )}

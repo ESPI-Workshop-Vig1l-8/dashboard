@@ -54,8 +54,8 @@ export default function CameraPanel({ motion, lastVisionAlert, now }) {
       <div className="sub-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600,
-            color: recent ? 'var(--rose)' : 'var(--text-secondary)' }}>
-            <span className="dot" style={{ background: recent ? 'var(--rose)' : 'var(--emerald)' }} />
+            color: recent ? 'var(--danger)' : 'var(--text-secondary)' }}>
+            <span className="dot" style={{ background: recent ? 'var(--danger)' : 'var(--ok)' }} />
             {recent
               ? `${lastVisionAlert.category.toUpperCase()}${typeof lastVisionAlert.confidence === 'number' ? ` • ${lastVisionAlert.confidence.toFixed(2)}` : ''}`
               : 'Zone calme'}
@@ -65,8 +65,8 @@ export default function CameraPanel({ motion, lastVisionAlert, now }) {
           </span>
         </div>
         <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontFamily: 'var(--font-mono)',
-          color: motion ? 'var(--rose)' : 'var(--text-muted)' }}>
-          <span className="dot" style={{ background: motion ? 'var(--rose)' : 'var(--text-dim)' }} />
+          color: motion ? 'var(--danger)' : 'var(--text-muted)' }}>
+          <span className="dot" style={{ background: motion ? 'var(--danger)' : 'var(--text-dim)' }} />
           PIR HC-SR501 : {motion ? 'mouvement détecté' : 'calme'}
         </span>
         <span className="mono-note">CAM01 // USB // 640x480 · les détections arrivent en alertes, flux affiché ou non</span>
@@ -74,7 +74,7 @@ export default function CameraPanel({ motion, lastVisionAlert, now }) {
 
       {visible && STREAM_URL && (
         <div style={{
-          position: 'relative', width: '100%', aspectRatio: '4/3', background: '#040507', borderRadius: '8px',
+          position: 'relative', width: '100%', aspectRatio: '4/3', background: 'var(--bg-0)', borderRadius: '8px',
           overflow: 'hidden', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           {!failed ? (
@@ -82,7 +82,7 @@ export default function CameraPanel({ motion, lastVisionAlert, now }) {
               style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '24px', textAlign: 'center' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--amber)', fontSize: '13px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--warn)', fontSize: '13px' }}>
                 <AlertTriangle size={15} /> Flux vidéo injoignable : IA_Vision est-il lancé sur le serveur ?
               </span>
               <button type="button" className="interactive-btn" onClick={() => { setFailed(false); setAttempt((n) => n + 1); }}>Réessayer</button>

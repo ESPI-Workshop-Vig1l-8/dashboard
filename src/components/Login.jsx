@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyRound, Radio } from 'lucide-react';
+import { KeyRound } from 'lucide-react';
 import { api } from '../lib/api';
 
 // The access key is the backend API token (operator or service). It is kept
@@ -25,18 +25,19 @@ export default function Login({ onLogin, reason }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-      <form onSubmit={submit} className="card-surface panel" style={{ width: '100%', maxWidth: '400px' }}>
-        <div className="panel-title" style={{ fontSize: '16px' }}>
-          <Radio size={18} color="var(--sky)" /> AetherCorp / Sentinel-X
+      <form onSubmit={submit} className="card-surface panel" style={{ width: '100%', maxWidth: '420px', gap: '18px', padding: '32px' }}>
+        <div className="brand">
+          <span className="brand-kicker">AetherCorp · VIG1L-8</span>
+          <span className="brand-name" style={{ fontSize: '34px' }}>Sentinel<span>-X</span></span>
         </div>
-        <p className="mono-note">Centre de commandement tactique — accès réservé. Saisissez la clé d'accès opérateur.</p>
-        <label className="metric-label" htmlFor="access-key" style={{ marginBottom: 0 }}>
-          <KeyRound size={14} /> Clé d'accès
+        <p className="mono-note">Centre de commandement de la table — accès réservé. Saisissez la clé d'accès opérateur.</p>
+        <label className="metric-label" htmlFor="access-key" style={{ marginBottom: '-8px' }}>
+          <KeyRound size={13} /> Clé d'accès
         </label>
         <input id="access-key" className="field" type="password" autoComplete="current-password" autoFocus
           value={key} onChange={(e) => setKey(e.target.value)} />
-        {error && <span className="mono-note" style={{ color: 'var(--rose)' }}>{error}</span>}
-        <button type="submit" className="interactive-btn accent" disabled={busy || !key.trim()} style={{ justifyContent: 'center' }}>
+        {error && <span className="mono-note" style={{ color: 'var(--danger)' }}>{error}</span>}
+        <button type="submit" className="interactive-btn accent" disabled={busy || !key.trim()} style={{ justifyContent: 'center', padding: '11px 16px' }}>
           {busy ? 'Vérification…' : 'Se connecter'}
         </button>
       </form>

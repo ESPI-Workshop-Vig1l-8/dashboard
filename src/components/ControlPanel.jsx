@@ -90,7 +90,7 @@ export default function ControlPanel({ device, canAct, now, annotations, onAnnot
 
       <div className="sub-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px' }}>
-          <Lightbulb size={16} color="var(--rose)" /> LED environnement (GPIO 18)
+          <Lightbulb size={16} color="var(--danger)" /> LED environnement (GPIO 26)
         </div>
         <p className="mono-note">
           Fixe : plafond local gaz/température dépassé sur le nœud. Clignotante : alerte confirmée ou commande opérateur (MQTT vigil8/{id || '…'}/cmd).
@@ -105,20 +105,20 @@ export default function ControlPanel({ device, canAct, now, annotations, onAnnot
           <button type="button" className="interactive-btn" disabled={disabled || offline} onClick={() => sendCommand(false)}>
             <Square size={14} /> Arrêter
           </button>
-          {offline && <span className="mono-note" style={{ color: 'var(--amber)' }}>nœud hors ligne</span>}
+          {offline && <span className="mono-note" style={{ color: 'var(--warn)' }}>nœud hors ligne</span>}
         </div>
       </div>
 
       <div className="sub-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, fontSize: '14px' }}>
-          <FlaskConical size={16} color="var(--sky)" /> Période de test (annotation)
+          <FlaskConical size={16} color="var(--info)" /> Période de test (annotation)
         </div>
         <p className="mono-note">
           Marquez vos tests (briquet, souffle chaud…) : ils sont exclus des données d'entraînement de l'Isolation Forest et servent à l'évaluer.
         </p>
         {pending ? (
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span className="badge" style={{ color: 'var(--sky)', borderColor: 'var(--sky-border)' }}>
+            <span className="badge" style={{ color: 'var(--info)', borderColor: 'var(--info-border)' }}>
               {LABELS.find((l) => l.value === pending.label)?.label || pending.label} · {fmtDuration(Math.floor((now - pending.start) / 1000))}
             </span>
             <button type="button" className="interactive-btn accent" disabled={disabled} onClick={() => stopTest(true)}>
@@ -150,7 +150,7 @@ export default function ControlPanel({ device, canAct, now, annotations, onAnnot
       </div>
 
       {feedback && (
-        <span className="mono-note" style={{ color: feedback.ok ? 'var(--emerald)' : 'var(--rose)' }}>{feedback.msg}</span>
+        <span className="mono-note" style={{ color: feedback.ok ? 'var(--ok)' : 'var(--danger)' }}>{feedback.msg}</span>
       )}
     </section>
   );

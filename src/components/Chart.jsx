@@ -78,14 +78,14 @@ export default function Chart({ points, metric, from, to, color, unit, digits = 
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: `${H}px`, overflow: 'visible', display: 'block' }} role="img" aria-label={`Historique ${metric}`}>
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.16" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
 
       {ticks.map((v) => (
         <g key={v}>
-          <line x1={PAD.left} x2={W - PAD.right} y1={y(v)} y2={y(v)} stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+          <line x1={PAD.left} x2={W - PAD.right} y1={y(v)} y2={y(v)} stroke="rgba(185,179,230,0.10)" strokeDasharray="3 3" />
           <text x={PAD.left - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="var(--text-dim)" fontFamily="var(--font-mono)">
             {v.toFixed(digits)}
           </text>
@@ -94,8 +94,8 @@ export default function Chart({ points, metric, from, to, color, unit, digits = 
 
       {threshold != null && threshold >= min && threshold <= max && (
         <g>
-          <line x1={PAD.left} x2={W - PAD.right} y1={y(threshold)} y2={y(threshold)} stroke="var(--rose)" strokeOpacity="0.5" strokeDasharray="5 4" />
-          <text x={W - PAD.right} y={y(threshold) - 4} textAnchor="end" fontSize="9" fill="var(--rose)" fontFamily="var(--font-mono)">
+          <line x1={PAD.left} x2={W - PAD.right} y1={y(threshold)} y2={y(threshold)} stroke="var(--danger)" strokeOpacity="0.5" strokeDasharray="5 4" />
+          <text x={W - PAD.right} y={y(threshold) - 4} textAnchor="end" fontSize="9" fill="var(--danger)" fontFamily="var(--font-mono)">
             plafond local {threshold} {unit}
           </text>
         </g>
@@ -109,7 +109,7 @@ export default function Chart({ points, metric, from, to, color, unit, digits = 
             {seg.length > 1 && (
               <polygon fill={`url(#${gradId})`} points={`${seg[0][0]},${base} ${line} ${seg[seg.length - 1][0]},${base}`} />
             )}
-            <polyline fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round" points={line} />
+            <polyline fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" points={line} />
             {seg.length === 1 && <circle cx={seg[0][0]} cy={seg[0][1]} r="2" fill={color} />}
           </g>
         );

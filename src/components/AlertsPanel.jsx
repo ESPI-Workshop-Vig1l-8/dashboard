@@ -34,7 +34,7 @@ export default function AlertsPanel({ alerts, canAct, onUpdated }) {
       <p className="mono-note">
         Avertissement : début d'un motif anormal. Confirmée : le motif se poursuit, la LED environnement du nœud clignote.
       </p>
-      {error && <span className="mono-note" style={{ color: 'var(--rose)' }}>{error}</span>}
+      {error && <span className="mono-note" style={{ color: 'var(--danger)' }}>{error}</span>}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '340px', overflowY: 'auto' }}>
         {!shown.length && <span className="mono-note">Aucune alerte {onlyOpen ? 'ouverte' : 'enregistrée'}.</span>}
