@@ -13,7 +13,7 @@ export default function IncidentToast({ incident, canAct, onAck, onClose }) {
           role="alert"
           style={{
             position: 'fixed', bottom: '28px', right: '28px', zIndex: 50, maxWidth: '460px', width: 'calc(100% - 56px)',
-            background: 'var(--bg-card)', border: `1px solid ${lvl.border}`, borderRadius: '12px', padding: '16px 20px',
+            background: 'var(--bg-1)', border: `1px solid ${lvl.border}`, borderRadius: '16px', padding: '16px 20px',
             boxShadow: '0 14px 36px -8px rgba(0,0,0,0.7)', display: 'flex', gap: '14px', alignItems: 'flex-start',
           }}>
           <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: lvl.subtle, border: `1px solid ${lvl.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, fetchHealth, getToken, setToken } from './lib/api';
+import { threatOf } from './lib/format';
 import { useSentinel } from './lib/useSentinel';
 import Header from './components/Header';
 import Login from './components/Login';
@@ -9,6 +10,7 @@ import AlertsPanel from './components/AlertsPanel';
 import ControlPanel from './components/ControlPanel';
 import EventLog from './components/EventLog';
 import IncidentToast from './components/IncidentToast';
+import AlertStrip from './components/AlertStrip';
 
 function beep(freq) {
   try {
@@ -80,31 +82,47 @@ function Dashboard({ token, role, onLogout }) {
   const lastPrediction = state.alerts.find((a) => a.source === 'ia-prediction' && forDevice(a));
   const lastVision = state.alerts.find((a) => a.source === 'ia-vision');
   const openAlerts = state.alerts.filter((a) => !a.acked_at).length;
+  const confirmedOpen = state.alerts.some((a) => !a.acked_at && a.level === 'confirmed');
+  const threat = threatOf({ openAlerts, confirmedOpen, device, now });
 
   return (
-    <div className="page">
+    <div className="shell">
       <Header devices={devices} selectedId={selectedId} onSelect={setSelected} conn={state.conn} health={health}
-        openAlerts={openAlerts} now={now} role={role} sound={sound} onSound={() => setSound((s) => !s)} onLogout={() => onLogout()} />
+        threat={threat} now={now} role={role} sound={sound} onSound={() => setSound((s) => !s)} onLogout={() => onLogout()} />
 
-      <div style={{ marginBottom: '20px' }}>
-        <SensorPanel device={device} live={state.live[selectedId]} now={now} lastPrediction={lastPrediction} />
-      </div>
-      <div className="grid-panels">
-        <CameraPanel motion={device?.motion} lastVisionAlert={lastVision} now={now} />
-        <AlertsPanel alerts={state.alerts} canAct={canAct} onUpdated={actions.alertUpdated} />
-        <ControlPanel key={selectedId || 'none'} device={device} canAct={canAct} now={now}
-          annotations={state.annotations.filter((a) => a.device_id === selectedId)} onAnnotations={actions.setAnnotations} />
-      </div>
-      <div style={{ marginBottom: '20px' }}>
-        <EventLog log={state.log} />
-      </div>
+      <main className="deck">
+        <AlertStrip alerts={state.alerts} canAct={canAct} now={now} onAck={ack} />
+
+        <div className="deck-grid">
+          <div className="col-main">
+            <div className="area-sensors">
+              <SensorPanel device={device} live={state.live[selectedId]} now={now} lastPrediction={lastPrediction} />
+            </div>
+            <div className="area-controls">
+              <ControlPanel key={selectedId || 'none'} device={device} canAct={canAct} now={now}
+                annotations={state.annotations.filter((a) => a.device_id === selectedId)} onAnnotations={actions.setAnnotations} />
+            </div>
+          </div>
+          <div className="col-side">
+            <div className="area-alerts">
+              <AlertsPanel alerts={state.alerts} canAct={canAct} onUpdated={actions.alertUpdated} />
+            </div>
+            <div className="area-vision">
+              <CameraPanel motion={device?.motion} lastVisionAlert={lastVision} now={now} />
+            </div>
+          </div>
+          <div className="area-log">
+            <EventLog log={state.log} />
+          </div>
+        </div>
+
+        <footer className="page-foot">
+          <span>ESP32 → MQTTS → Mosquitto → backend Go → CouchDB · {health ? `backend ${Math.floor(health.uptime_s / 60)} min, ${health.rejected} message(s) rejeté(s)` : 'backend ?'}</span>
+          <span>EPSI Workshop National · M1 2026</span>
+        </footer>
+      </main>
 
       <IncidentToast incident={state.incident} canAct={canAct} onAck={ack} onClose={actions.dismissIncident} />
-
-      <footer style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', fontSize: '12px', color: 'var(--text-muted)', padding: '10px 4px', borderTop: '1px solid var(--border-subtle)', fontFamily: 'var(--font-mono)' }}>
-        <span>ESP32 → MQTTS → Mosquitto → backend Go → CouchDB · {health ? `backend ${Math.floor(health.uptime_s / 60)} min, ${health.rejected} message(s) rejeté(s)` : 'backend ?'}</span>
-        <span>EPSI Workshop National • M1 2026</span>
-      </footer>
     </div>
   );
 }

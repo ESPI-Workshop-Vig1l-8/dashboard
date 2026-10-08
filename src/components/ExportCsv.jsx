@@ -42,7 +42,7 @@ export default function ExportCsv({ deviceId }) {
         <Download size={14} /> Exporter CSV
       </button>
       {open && (
-        <div className="sub-card" style={{ flexBasis: '100%', display: 'flex', flexDirection: 'column', gap: '8px', background: 'var(--bg-app)' }}>
+        <div className="sub-card" style={{ flexBasis: '100%', display: 'flex', flexDirection: 'column', gap: '8px', background: 'var(--bg-0)' }}>
           <span className="mono-note">
             CSV d'entraînement de l'Isolation Forest : mesures normales seulement (sans erreur DHT22, préchauffage ni périodes de test),
             découpées en segments continus. À enregistrer en donnees/normal.csv, puis python entrainement.py.
@@ -62,7 +62,7 @@ export default function ExportCsv({ deviceId }) {
             </button>
           </div>
           {state && !state.busy && (
-            <span className="mono-note" style={{ color: state.ok ? 'var(--emerald)' : 'var(--amber)' }}>{state.msg}</span>
+            <span className="mono-note" style={{ color: state.ok ? 'var(--ok)' : 'var(--warn)' }}>{state.msg}</span>
           )}
         </div>
       )}

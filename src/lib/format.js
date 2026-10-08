@@ -40,6 +40,15 @@ export function fmtDuration(secs) {
 }
 
 export const LEVEL = {
-  warning: { label: 'Avertissement', color: 'var(--amber)', subtle: 'var(--amber-subtle)', border: 'var(--amber-border)' },
-  confirmed: { label: 'Confirmée', color: 'var(--rose)', subtle: 'var(--rose-subtle)', border: 'var(--rose-border)' },
+  warning: { label: 'Avertissement', color: 'var(--warn)', subtle: 'var(--warn-subtle)', border: 'var(--warn-border)' },
+  confirmed: { label: 'Confirmée', color: 'var(--danger)', subtle: 'var(--danger-subtle)', border: 'var(--danger-border)' },
 };
+
+// Overall state of the table, from the open alerts and the node's link
+export function threatOf({ openAlerts, confirmedOpen, device, now }) {
+  if (confirmedOpen) return { tone: 'alert', state: 'ALERTE', detail: 'Alerte confirmée en attente d\'acquittement' };
+  if (openAlerts) return { tone: 'warning', state: 'VIGILANCE', detail: `${openAlerts} alerte${openAlerts > 1 ? 's' : ''} ouverte${openAlerts > 1 ? 's' : ''}` };
+  if (!device) return { tone: 'muted', state: 'EN ATTENTE', detail: 'Aucun nœud n\'a encore publié' };
+  if (!device.online || now - (device.last_seen || 0) > STALE_MS) return { tone: 'warning', state: 'DÉGRADÉ', detail: 'Le nœud ne transmet plus' };
+  return { tone: 'nominal', state: 'NOMINAL', detail: 'Aucune alerte ouverte' };
+}

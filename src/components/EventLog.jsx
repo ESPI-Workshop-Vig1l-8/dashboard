@@ -4,9 +4,9 @@ import { fmtTime } from '../lib/format';
 
 const TABS = ['TOUT', 'CAPTEURS', 'ALERTES', 'SYSTÈME'];
 const COLORS = {
-  MOUVEMENT: 'var(--rose)', CONFIRMÉE: 'var(--rose)', 'HORS LIGNE': 'var(--rose)',
-  AVERTISSEMENT: 'var(--amber)', COMMANDE: 'var(--amber)',
-  'EN LIGNE': 'var(--emerald)', ACQUITTÉE: 'var(--emerald)', ANNOTATION: 'var(--sky)',
+  MOUVEMENT: 'var(--danger)', CONFIRMÉE: 'var(--danger)', 'HORS LIGNE': 'var(--danger)',
+  AVERTISSEMENT: 'var(--warn)', COMMANDE: 'var(--warn)',
+  'EN LIGNE': 'var(--ok)', ACQUITTÉE: 'var(--ok)', ANNOTATION: 'var(--info)',
 };
 
 export default function EventLog({ log }) {
@@ -34,7 +34,7 @@ export default function EventLog({ log }) {
       </div>
 
       <div ref={scrollRef} style={{
-        flex: 1, minHeight: '220px', maxHeight: '320px', overflowY: 'auto', background: '#040507',
+        flex: 1, minHeight: '220px', maxHeight: '320px', overflowY: 'auto', background: 'var(--bg-0)',
         border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '12px 14px',
         fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: 1.7,
       }}>
